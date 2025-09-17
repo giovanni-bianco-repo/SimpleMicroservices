@@ -1,27 +1,29 @@
 # Sprint Completion Status Report
-**Student Name:**: Bianco Giovanni
-**Sprint Number:**: Sprint 0
+**Student Name:** Bianco Giovanni
+**Sprint Number:** Sprint 0
 **Duration:** 12/09/2025 – 14/09/2025
 **Report Date:** 14/09/2025
 ### 1. Sprint Goal 🎯
 **Defined Goal:**
 1. Clone Professor Ferguson’s Simple Microservices Repository.
 2. Create a project that is my version using two different resources.
-a. Copy the structure of Professor Ferguson’s repository
-b. Define two models.
-c. Implement “API first” definition by implementing placeholder routes for
-each resource:
-i. GET /<resource>
-ii. POST /<resource>
-iii. GET /<resource>/{id}
-iv. PUT /<resource>/{id}
-v. DELETE /<resource>/{id}
-d. Annotate models and paths to autogenerate OpenAPI document.
-e. Tested OpenAPI document dispatching to methods.
-**Outcome:**: Achieved
-**Notes:**
+   a. Copy the structure of Professor Ferguson’s repository
+   b. Define two models.
+   c. Implement “API first” definition by implementing placeholder routes for
+      each resource:
+      i. GET /<resource>
+      ii. POST /<resource>
+      iii. GET /<resource>/{id}
+      iv. PUT /<resource>/{id}
+      v. DELETE /<resource>/{id}
+   d. Annotate models and paths to autogenerate OpenAPI document.
+   e. Test OpenAPI document dispatching to methods.
+
+
+**Outcome:** Achieved
+
 ### 2. Completed Work ✅
-resource0
+**Resource0** (course, used in resource1)
 ```python
 
 class Course(BaseModel):
@@ -57,13 +59,13 @@ class Course(BaseModel):
         }
     }
 ```
-Resource1
+**Resource1**: model of a course conversion between home and host university (in the context of an exchange for a student who studied abroad). It is characterized by 2 courses (the course taken abroad at the host institution and the corresponding home course). It also specifies what is the host institution
 ```python
 
 class ConversionBase(BaseModel):
     foreign_course: Course = Field(
         ...,
-        description="Course taken at the host institution",
+        description="Course taken at the host institution", 
         json_schema_extra={
             "example": {
                 "id": 123,
@@ -116,14 +118,13 @@ class ConversionBase(BaseModel):
 ```
 
 
-
-Resource 2
+**Resource 2**: destination university in the context of a study abroad program
 ```python
 
 DestIdType = Annotated[str, StringConstraints(pattern=r"^[A-Z]{3}\d{3}$")]
 
 class DestinationBase(BaseModel):
-    '''Model for am university destination for an exchange program'''
+    '''Model for a university destination for an exchange program'''
     dest_id: DestIdType = Field(
         ...,
         description="Destination ID (3 uppercase letters + 3 digits).",
@@ -198,7 +199,7 @@ class DestinationBase(BaseModel):
 ```
 
 ### Routes
-for destinations 
+For destinations 
 ```python 
 @router.post("/destinations", response_model=DestinationRead, status_code=201)
 def create_destination(destination: DestinationCreate) -> DestinationRead:
@@ -277,8 +278,15 @@ def update_destination(
     destinations[destination_id] = updated
     return updated
 
+@router.delete("/destinations/{dest_id}", status_code=204)
+def delete_destination(destination_id: UUID) -> None:
+    """Delete a destination by its ID."""
+    if destination_id not in destinations:
+        raise HTTPException(status_code=404, detail="Destination not found")
+    del destinations[destination_id]
+
 ```
-for conversions
+For conversions
 
 ```python
 
@@ -346,11 +354,26 @@ def update_conversion(conversion_id: UUID, update: ConversionUpdate) -> Conversi
     conversions[conversion_id] = updated
     return updated
 
+
+
+@router.delete("/conversions/{conversion_id}", status_code=204)
+def delete_conversion(conversion_id: UUID) -> None:
+    """Delete a conversion by its ID."""
+    if conversion_id not in conversions:
+        raise HTTPException(status_code=404, detail="Conversion not found")
+    del conversions[conversion_id]
+
+
 ```
 
 
 ### OpenAPI Document (Partial)
+![alt text](<Screenshot 2025-09-14 at 22.19.41.png>)
+![alt text](<Screenshot 2025-09-14 at 22.18.45.png>)
+
+
+
 Link to Recording of Demo
-Note: A link to a publicly accessible screen recording that the TAs can view.
+https://drive.google.com/file/d/1aLGBszbSp8cx1DomkIBRjvf3cS3JZFvO/view?usp=sharing
 Link to GitHub Repository
-Note: A link to the GitHub repo for your starter project.
+https://github.com/giovanni-bianco-repo/SimpleMicroservices
